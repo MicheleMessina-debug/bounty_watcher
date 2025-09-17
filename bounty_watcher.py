@@ -7,7 +7,7 @@ from datetime import datetime
 # Variabili d'ambiente
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-SEEN_FILE = "seen.json"
+SEEN_FILE = "/data/seen.json"
 USER_AGENT = "bounty-watcher/1.0 (+https://github.com/MicheleMessina-debug)"
 
 # Lista siti bug bounty
