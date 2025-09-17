@@ -15,8 +15,8 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-TELEGRAM_TOKEN = os.getenv("8410152864:AAG8w0yruwCqAH_nlgNYhqGOm3Q3xb4LfI8")
-TELEGRAM_CHAT_ID = os.getenv("631671961")
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 SEEN_FILE = "seen.json"
 USER_AGENT = "bounty-watcher/1.0 (+https://github.com/MicheleMessina-debug)"
 
@@ -171,7 +171,7 @@ def run_once():
     return new_found
 
 if __name__ == "__main__":
-    # Loop single-run: exit -> utile per GitHub Actions / cron / scheduler
+    send_telegram("📢 Test rapido: nuovo programma simulato\nhttps://example.com")
     run_once()
 
 
