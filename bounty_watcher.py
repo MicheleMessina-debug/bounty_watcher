@@ -151,7 +151,6 @@ def run_once():
 
 if __name__ == "__main__":
     # Test rapido Telegram
-    send_telegram("📢 Test rapido: nuovo programma simulato\nhttps://example.com")
     run_once()
 
 
