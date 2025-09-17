@@ -7,7 +7,6 @@ from datetime import datetime
 # Variabili d'ambiente
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-SEEN_FILE = "seen.json"
 USER_AGENT = "bounty-watcher/1.0 (+https://github.com/MicheleMessina-debug)"
 
 # Lista siti bug bounty
@@ -19,17 +18,6 @@ SITES = [
 ]
 
 HEADERS = {"User-Agent": USER_AGENT}
-
-# Load / Save programmi già visti
-def load_seen():
-    if os.path.exists(SEEN_FILE):
-        with open(SEEN_FILE, "r") as f:
-            return json.load(f)
-    return {"seen": []}
-
-def save_seen(data):
-    with open(SEEN_FILE, "w") as f:
-        json.dump(data, f, indent=2)
 
 # Funzione per inviare Telegram
 def send_telegram(text):
@@ -57,7 +45,7 @@ def fetch(url):
         print("Fetch error:", e)
         return ""
 
-# Parser base per i siti
+# Parser dei siti
 def parse_hackerone(html):
     soup = BeautifulSoup(html, "html.parser")
     cards = soup.select("a.program-listing-card__link") or soup.select("a.d-block")
@@ -117,10 +105,13 @@ PARSERS = {
     "bugcrowd": parse_bugcrowd
 }
 
-# Funzione principale
+# --- LOGICA BOT ---
+
+# Memorizza in memoria i programmi già presenti al primo avvio
+already_seen = set()
+
 def run_once():
-    data = load_seen()
-    seen = set(data.get("seen", []))
+    global already_seen
     new_found = []
 
     for s in SITES:
@@ -134,11 +125,9 @@ def run_once():
         items = parser(html)
         for it in items:
             uid = it["id"]
-            if uid not in seen:
-                seen.add(uid)
+            if uid not in already_seen:
+                already_seen.add(uid)
                 new_found.append((s["name"], it))
-
-    save_seen({"seen": list(seen)})
 
     for site_name, it in new_found:
         text = f"📢 Nuovo programma su {site_name}\n{it['title']}\n{it['url']}"
@@ -150,8 +139,17 @@ def run_once():
     return new_found
 
 if __name__ == "__main__":
+    # Al primo avvio, registra tutti i programmi esistenti senza inviare notifiche
+    for s in SITES:
+        html = fetch(s["url"])
+        parser = PARSERS.get(s["parser"])
+        if html and parser:
+            items = parser(html)
+            for it in items:
+                already_seen.add(it["id"])
+
+    # Ora esegui la funzione principale (cron o manuale)
     run_once()
- 
 
     
   
