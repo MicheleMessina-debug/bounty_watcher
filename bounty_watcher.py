@@ -12,9 +12,7 @@ USER_AGENT = "bounty-watcher/1.0 (+https://github.com/MicheleMessina-debug)"
 
 # Lista siti bug bounty
 SITES = [
-    {"name": "HackerOne", "url": "https://hackerone.com/bug-bounty-programs", "parser": "hackerone"},
-    {"name": "Bugcrowd", "url": "https://www.bugcrowd.com/programs/", "parser": "bugcrowd"},
-    {"name": "Intigriti", "url": "https://www.intigriti.com/researchers/bug-bounty-programs", "parser": "intigriti"},
+    
     {"name": "YesWeHack", "url": "https://yeswehack.com/programs", "parser": "yeswehack"}
 ]
 
@@ -57,33 +55,6 @@ def fetch(url):
         print("Fetch error:", e)
         return ""
 
-# Parser base per i siti
-def parse_hackerone(html):
-    soup = BeautifulSoup(html, "html.parser")
-    cards = soup.select("a.program-listing-card__link") or soup.select("a.d-block")
-    results = []
-    for c in cards:
-        title = c.get_text(strip=True)
-        href = c.get("href")
-        if href and title:
-            if href.startswith("/"):
-                href = "https://hackerone.com" + href
-            results.append({"id": href, "title": title, "url": href})
-    return results
-
-def parse_intigriti(html):
-    soup = BeautifulSoup(html, "html.parser")
-    items = soup.select("a.program-card") or soup.select("a.card")
-    results = []
-    for it in items:
-        title = it.select_one(".title") or it.get_text(strip=True)
-        href = it.get("href")
-        if href and title:
-            if href.startswith("/"):
-                href = "https://www.intigriti.com" + href
-            results.append({"id": href, "title": title.get_text(strip=True) if hasattr(title, 'get_text') else title, "url": href})
-    return results
-
 def parse_yeswehack(html):
     soup = BeautifulSoup(html, "html.parser")
     items = soup.select("a.program-card") or soup.select("a[href*='/programs/']")
@@ -97,24 +68,8 @@ def parse_yeswehack(html):
             results.append({"id": href, "title": title, "url": href})
     return results
 
-def parse_bugcrowd(html):
-    soup = BeautifulSoup(html, "html.parser")
-    items = soup.select("a.program-item") or soup.select("a[href*='/programs/']")
-    results = []
-    for it in items:
-        title = it.get_text(strip=True)
-        href = it.get("href")
-        if href and title:
-            if href.startswith("/"):
-                href = "https://www.bugcrowd.com" + href
-            results.append({"id": href, "title": title, "url": href})
-    return results
-
 PARSERS = {
-    "hackerone": parse_hackerone,
-    "intigriti": parse_intigriti,
     "yeswehack": parse_yeswehack,
-    "bugcrowd": parse_bugcrowd
 }
 
 # Funzione principale
