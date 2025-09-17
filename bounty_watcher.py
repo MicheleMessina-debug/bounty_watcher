@@ -1,50 +1,26 @@
-#!/usr/bin/env python3
-"""
-bounty_watcher.py
-Monitora le pagine pubbliche di HackerOne / Bugcrowd / Intigriti / YesWeHack
-e invia notifiche Telegram per nuovi programmi.
-Config via env vars:
-  TELEGRAM_TOKEN, TELEGRAM_CHAT_ID
-Uso: python3 bounty_watcher.py
-Mantiene 'seen.json' con gli id/url già notificati.
-"""
 import os
-import time
 import json
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 
+# Variabili d'ambiente
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 SEEN_FILE = "seen.json"
 USER_AGENT = "bounty-watcher/1.0 (+https://github.com/MicheleMessina-debug)"
 
+# Lista siti bug bounty
 SITES = [
-    {
-        "name": "HackerOne",
-        "url": "https://hackerone.com/bug-bounty-programs",
-        "parser": "hackerone"
-    },
-    {
-        "name": "Bugcrowd",
-        "url": "https://www.bugcrowd.com/programs/",
-        "parser": "bugcrowd"
-    },
-    {
-        "name": "Intigriti",
-        "url": "https://www.intigriti.com/researchers/bug-bounty-programs",
-        "parser": "intigriti"
-    },
-    {
-        "name": "YesWeHack",
-        "url": "https://yeswehack.com/programs",
-        "parser": "yeswehack"
-    }
+    {"name": "HackerOne", "url": "https://hackerone.com/bug-bounty-programs", "parser": "hackerone"},
+    {"name": "Bugcrowd", "url": "https://www.bugcrowd.com/programs/", "parser": "bugcrowd"},
+    {"name": "Intigriti", "url": "https://www.intigriti.com/researchers/bug-bounty-programs", "parser": "intigriti"},
+    {"name": "YesWeHack", "url": "https://yeswehack.com/programs", "parser": "yeswehack"}
 ]
 
 HEADERS = {"User-Agent": USER_AGENT}
 
+# Load / Save programmi già visti
 def load_seen():
     if os.path.exists(SEEN_FILE):
         with open(SEEN_FILE, "r") as f:
@@ -55,12 +31,13 @@ def save_seen(data):
     with open(SEEN_FILE, "w") as f:
         json.dump(data, f, indent=2)
 
+# Funzione per inviare Telegram
 def send_telegram(text):
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
         print("Telegram token / chat id mancanti.")
         return
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    payload = {"chat_id": TELEGRAM_CHAT_ID, "text": text, "disable_web_page_preview": False}
+    payload = {"chat_id": TELEGRAM_CHAT_ID, "text": text}
     try:
         r = requests.post(url, json=payload, timeout=15)
         if not r.ok:
@@ -68,20 +45,20 @@ def send_telegram(text):
     except Exception as e:
         print("Eccezione invio telegram:", e)
 
+# Funzione per fetch delle pagine
 def fetch(url):
     try:
         r = requests.get(url, headers=HEADERS, timeout=20)
         if r.status_code == 200:
             return r.text
-        else:
-            print(f"Fetch {url} -> {r.status_code}")
-            return ""
+        print(f"Fetch {url} -> {r.status_code}")
+        return ""
     except Exception as e:
         print("Fetch error:", e)
         return ""
 
+# Parser base per i siti
 def parse_hackerone(html):
-    # Semplice estrazione: titoli e link delle card di programmi
     soup = BeautifulSoup(html, "html.parser")
     cards = soup.select("a.program-listing-card__link") or soup.select("a.d-block")
     results = []
@@ -140,10 +117,12 @@ PARSERS = {
     "bugcrowd": parse_bugcrowd
 }
 
+# Funzione principale
 def run_once():
     data = load_seen()
     seen = set(data.get("seen", []))
     new_found = []
+
     for s in SITES:
         print(f"[{datetime.utcnow().isoformat()}] Controllo {s['name']} ...")
         html = fetch(s["url"])
@@ -158,20 +137,22 @@ def run_once():
             if uid not in seen:
                 seen.add(uid)
                 new_found.append((s["name"], it))
-    # Salva lo stato
+
     save_seen({"seen": list(seen)})
-    # Notifica i nuovi
+
     for site_name, it in new_found:
-        text = f"📢 Nuovo programma su {site_name}\n\n*{it['title']}*\n{it['url']}"
-        # Telegram accepts MarkdownV2 or simple text; here we use simple text
+        text = f"📢 Nuovo programma su {site_name}\n{it['title']}\n{it['url']}"
         send_telegram(text)
         print("Notify:", it['title'])
+
     if not new_found:
         print("Nessun nuovo programma trovato.")
     return new_found
 
 if __name__ == "__main__":
+    # Test rapido Telegram
     send_telegram("📢 Test rapido: nuovo programma simulato\nhttps://example.com")
     run_once()
+
 
 
