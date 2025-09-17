@@ -150,9 +150,13 @@ def run_once():
     return new_found
 
 if __name__ == "__main__":
-    # Test rapido Telegram
     send_telegram("📢 Test rapido: nuovo programma simulato\nhttps://example.com")
     run_once()
+    while True:
+        time.sleep(60)  
+
+    
+  
 
 
 
