@@ -162,7 +162,7 @@ def run_once():
     save_seen({"seen": list(seen)})
     # Notifica i nuovi
     for site_name, it in new_found:
-        text = f"📢 *Nuovo programma* su {site_name}\n\n*{it['title']}*\n{it['url']}"
+        text = f"📢 Nuovo programma su {site_name}\n\n*{it['title']}*\n{it['url']}"
         # Telegram accepts MarkdownV2 or simple text; here we use simple text
         send_telegram(text)
         print("Notify:", it['title'])
