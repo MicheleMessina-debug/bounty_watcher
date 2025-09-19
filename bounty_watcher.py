@@ -82,6 +82,8 @@ def run_once():
     seen = set(old_data.get("seen", []))
     new_found = []
 
+    first_run = len(seen) == 0  # True se file appena creato o vuoto
+
     for s in SITES:
         print(f"[{datetime.utcnow().isoformat()}] Controllo {s['name']} ...")
         html = fetch(s["url"])
@@ -95,19 +97,24 @@ def run_once():
             uid = it["id"]
             if uid not in seen:
                 seen.add(uid)
-                new_found.append((s["name"], it))
+                if not first_run:
+                    new_found.append((s["name"], it))  # Aggiunge solo se non è la prima run
 
-    if set(old_data.get("seen", [])) != seen:
-        save_seen({"seen": list(seen)})
+    # Salva tutti i programmi nel file (anche se è la prima run)
+    save_seen({"seen": list(seen)})
 
+    # Notifica solo se non è la prima run
     for site_name, it in new_found:
         text = f"📢 Nuovo programma su {site_name}\n{it['title']}\n{it['url']}"
         send_telegram(text)
         print(f"[{datetime.utcnow().isoformat()}] Notify: {it['title']}")
 
-    if not new_found:
+    if first_run:
+        print(f"[{datetime.utcnow().isoformat()}] Prima esecuzione: tutti i programmi salvati senza notifiche.")
+    elif not new_found:
         print(f"[{datetime.utcnow().isoformat()}] Nessun nuovo programma trovato.")
     return new_found
+
 
 if __name__ == "__main__":
     run_once()
