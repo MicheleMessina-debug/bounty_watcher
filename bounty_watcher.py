@@ -7,7 +7,10 @@ import time
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-SEEN_FILE = "/mnt/data/seen.json"
+
+# File salvato in ./data/seen.json all'interno della cartella del progetto
+SEEN_FILE = os.path.join("data", "seen.json")
+
 USER_AGENT = "bounty-watcher/1.0 (+https://github.com/MicheleMessina-debug)"
 HEADERS = {"User-Agent": USER_AGENT}
 
@@ -15,6 +18,7 @@ SITES = [
     {"name": "YesWeHack", "url": "https://yeswehack.com/programs", "parser": "yeswehack"}
 ]
 
+# --- Funzioni per il file seen.json ---
 def load_seen():
     os.makedirs(os.path.dirname(SEEN_FILE), exist_ok=True)
     if os.path.exists(SEEN_FILE):
@@ -34,6 +38,7 @@ def save_seen(data):
     with open(SEEN_FILE, "w") as f:
         json.dump(data, f, indent=2)
 
+# --- Funzione per Telegram ---
 def send_telegram(text):
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
         print(f"[{datetime.utcnow().isoformat()}] Telegram token / chat id mancanti.")
@@ -47,6 +52,7 @@ def send_telegram(text):
     except Exception as e:
         print(f"[{datetime.utcnow().isoformat()}] Eccezione invio telegram:", e)
 
+# --- Funzioni di scraping ---
 def fetch(url, retries=3, delay=5):
     for attempt in range(retries):
         try:
@@ -77,6 +83,7 @@ PARSERS = {
     "yeswehack": parse_yeswehack,
 }
 
+# --- Logica principale ---
 def run_once():
     old_data = load_seen()
     seen = set(old_data.get("seen", []))
@@ -115,10 +122,8 @@ def run_once():
         print(f"[{datetime.utcnow().isoformat()}] Nessun nuovo programma trovato.")
     return new_found
 
-
 if __name__ == "__main__":
     run_once()
-
 
   
 
