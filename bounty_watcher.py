@@ -20,7 +20,7 @@ SITES = [
 
 # --- Funzioni per il file seen.json ---
 def load_seen():
-    os.makedirs(os.path.dirname(SEEN_FILE), exist_ok=True)
+    # Non creare la cartella: il volume esiste già
     if os.path.exists(SEEN_FILE):
         try:
             with open(SEEN_FILE, "r") as f:
@@ -34,7 +34,7 @@ def load_seen():
         return {"seen": []}
 
 def save_seen(data):
-    os.makedirs(os.path.dirname(SEEN_FILE), exist_ok=True)
+    # Non creare la cartella: il volume esiste già
     with open(SEEN_FILE, "w") as f:
         json.dump(data, f, indent=2)
 
