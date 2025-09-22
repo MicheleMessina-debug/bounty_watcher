@@ -8,8 +8,8 @@ import time
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-# File salvato in ./data/seen.json all'interno della cartella del progetto
-SEEN_FILE = os.path.join("data", "seen.json")
+# --- Usa Persistent Storage di Railway ---
+SEEN_FILE = "/mnt/data/seen.json"
 
 USER_AGENT = "bounty-watcher/1.0 (+https://github.com/MicheleMessina-debug)"
 HEADERS = {"User-Agent": USER_AGENT}
@@ -124,8 +124,3 @@ def run_once():
 
 if __name__ == "__main__":
     run_once()
-
-  
-
-
-
