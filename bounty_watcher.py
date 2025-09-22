@@ -2,7 +2,7 @@ import os
 import json
 import requests
 from bs4 import BeautifulSoup
-from datetime import datetime
+from datetime import datetime, timezone
 import time
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
