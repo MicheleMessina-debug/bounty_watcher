@@ -26,7 +26,7 @@ def load_seen():
             with open(SEEN_FILE, "r") as f:
                 return json.load(f)
         except json.JSONDecodeError:
-            print(f"[{datetime.utcnow().isoformat()}] WARNING: File {SEEN_FILE} corrotto. Reset.")
+            print(f"[{datetime.now(timezone.utc).isoformat()}] WARNING: File {SEEN_FILE} corrotto. Reset.")
             return {"seen": []}
     else:
         with open(SEEN_FILE, "w") as f:
@@ -41,16 +41,16 @@ def save_seen(data):
 # --- Funzione per Telegram ---
 def send_telegram(text):
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
-        print(f"[{datetime.utcnow().isoformat()}] Telegram token / chat id mancanti.")
+        print(f"[{datetime.now(timezone.utc).isoformat()}] Telegram token / chat id mancanti.")
         return
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = {"chat_id": TELEGRAM_CHAT_ID, "text": text}
     try:
         r = requests.post(url, json=payload, timeout=15)
         if not r.ok:
-            print(f"[{datetime.utcnow().isoformat()}] Errore invio telegram: {r.status_code} {r.text}")
+            print(f"[{datetime.now(timezone.utc).isoformat()}] Errore invio telegram: {r.status_code} {r.text}")
     except Exception as e:
-        print(f"[{datetime.utcnow().isoformat()}] Eccezione invio telegram:", e)
+        print(f"[{datetime.now(timezone.utc).isoformat()}] Eccezione invio telegram:", e)
 
 # --- Funzioni di scraping ---
 def fetch(url, retries=3, delay=5):
@@ -60,9 +60,9 @@ def fetch(url, retries=3, delay=5):
             if r.status_code == 200:
                 return r.text
             else:
-                print(f"[{datetime.utcnow().isoformat()}] Fetch {url} -> {r.status_code}")
+                print(f"[{datetime.now(timezone.utc).isoformat()}] Fetch {url} -> {r.status_code}")
         except Exception as e:
-            print(f"[{datetime.utcnow().isoformat()}] Fetch error attempt {attempt+1}: {e}")
+            print(f"[{datetime.now(timezone.utc).isoformat()}] Fetch error attempt {attempt+1}: {e}")
         time.sleep(delay)
     return ""
 
@@ -92,7 +92,7 @@ def run_once():
     first_run = len(seen) == 0  # True se file appena creato o vuoto
 
     for s in SITES:
-        print(f"[{datetime.utcnow().isoformat()}] Controllo {s['name']} ...")
+        print(f"[{datetime.now(timezone.utc).isoformat()}] Controllo {s['name']} ...")
         html = fetch(s["url"])
         if not html:
             continue
@@ -114,12 +114,12 @@ def run_once():
     for site_name, it in new_found:
         text = f"📢 Nuovo programma su {site_name}\n{it['title']}\n{it['url']}"
         send_telegram(text)
-        print(f"[{datetime.utcnow().isoformat()}] Notify: {it['title']}")
+        print(f"[{datetime.now(timezone.utc).isoformat()}] Notify: {it['title']}")
 
     if first_run:
-        print(f"[{datetime.utcnow().isoformat()}] Prima esecuzione: tutti i programmi salvati senza notifiche.")
+        print(f"[{datetime.now(timezone.utc).isoformat()}] Prima esecuzione: tutti i programmi salvati senza notifiche.")
     elif not new_found:
-        print(f"[{datetime.utcnow().isoformat()}] Nessun nuovo programma trovato.")
+        print(f"[{datetime.now(timezone.utc).isoformat()}] Nessun nuovo programma trovato.")
     return new_found
 
 if __name__ == "__main__":
