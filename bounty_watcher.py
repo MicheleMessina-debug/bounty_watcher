@@ -8,7 +8,6 @@ import time
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-# --- Usa Persistent Storage di Railway ---
 SEEN_FILE = "/mnt/data/seen.json"
 
 USER_AGENT = "bounty-watcher/1.0 (+https://github.com/MicheleMessina-debug)"
@@ -18,9 +17,7 @@ SITES = [
     {"name": "YesWeHack", "url": "https://yeswehack.com/programs", "parser": "yeswehack"}
 ]
 
-# --- Funzioni per il file seen.json ---
 def load_seen():
-    # Non creare la cartella: il volume esiste già
     if os.path.exists(SEEN_FILE):
         try:
             with open(SEEN_FILE, "r") as f:
@@ -34,11 +31,9 @@ def load_seen():
         return {"seen": []}
 
 def save_seen(data):
-    # Non creare la cartella: il volume esiste già
     with open(SEEN_FILE, "w") as f:
         json.dump(data, f, indent=2)
 
-# --- Funzione per Telegram ---
 def send_telegram(text):
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
         print(f"[{datetime.now(timezone.utc).isoformat()}] Telegram token / chat id mancanti.")
@@ -52,7 +47,6 @@ def send_telegram(text):
     except Exception as e:
         print(f"[{datetime.now(timezone.utc).isoformat()}] Eccezione invio telegram:", e)
 
-# --- Funzioni di scraping ---
 def fetch(url, retries=3, delay=5):
     for attempt in range(retries):
         try:
@@ -83,13 +77,12 @@ PARSERS = {
     "yeswehack": parse_yeswehack,
 }
 
-# --- Logica principale ---
 def run_once():
     old_data = load_seen()
     seen = set(old_data.get("seen", []))
     new_found = []
 
-    first_run = len(seen) == 0  # True se file appena creato o vuoto
+    first_run = len(seen) == 0  
 
     for s in SITES:
         print(f"[{datetime.now(timezone.utc).isoformat()}] Controllo {s['name']} ...")
@@ -105,12 +98,10 @@ def run_once():
             if uid not in seen:
                 seen.add(uid)
                 if not first_run:
-                    new_found.append((s["name"], it))  # Aggiunge solo se non è la prima run
+                    new_found.append((s["name"], it))  
 
-    # Salva tutti i programmi nel file (anche se è la prima run)
     save_seen({"seen": list(seen)})
 
-    # Notifica solo se non è la prima run
     for site_name, it in new_found:
         text = f"📢 Nuovo programma su {site_name}\n{it['title']}\n{it['url']}"
         send_telegram(text)
