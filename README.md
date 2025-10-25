@@ -75,6 +75,8 @@ INTERVAL_MINUTES=10
 
 Il bot resterà attivo 24/7 **senza costi aggiuntivi** (entro i limiti del piano gratuito di Railway).
 
+![Descrizione immagine](assets/chat.png)
+
 ---
 
 ## Tecnologie utilizzate
