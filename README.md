@@ -42,6 +42,9 @@ pip install -r requirements.txt
 ### 3. Crea un bot Telegram
 
 1. Apri Telegram e cerca **@BotFather**
+   
+![Descrizione immagine](assets/Bot-father.png)
+   
 2. Crea un nuovo bot con `/newbot`
 3. Copia il token fornito (lo userai come variabile d’ambiente)
 
