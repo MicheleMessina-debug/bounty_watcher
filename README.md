@@ -90,4 +90,4 @@ Distribuito sotto licenza **MIT** — libero utilizzo e modifiche, con attribuzi
 
 **Michele Messina**
 [Portfolio](https://www.michelemessina.dev)
-[LinkedIn](https://www.linkedin.com/in/michelemessina-518a55278)
+[LinkedIn](https://www.linkedin.com/in/michele-messina-518a55278/))
